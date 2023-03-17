@@ -3,6 +3,7 @@ const userModel = require('../users/user-model');
 const { JWT_SECRET } = require('../secret/index');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { getPostsById, getPostsByFilter } = require('../posts/post-model');
 
 const payloadCheck = async (req, res, next) => {
     try {
@@ -57,12 +58,12 @@ const tokenCheck = async (req, res, next) => {
         if (!header) {
             res.status(401).json({ message: "Token bulunamadı" });
         } else {
-            const jwtvr = jwt.verify(header, JWT_SECRET, (err, decode) => {
+            const jwtvr = jwt.verify(header, JWT_SECRET,  (err, decode) => {
                 if (err) {
                     res.status(401).json({ message: "Token geçersizdir" });
                 } else {
                     req.decodeToken = decode;
-                    // console.log(req.decodeToken);
+                    // console.log(req.decodeToken.role_name);
                     // console.log(req.decodeToken.subject);
                     next();
                 }
@@ -75,7 +76,8 @@ const tokenCheck = async (req, res, next) => {
 
 const roleNameCheck = async (req, res, next) => {
     try {
-        if (req.decodeToken.role_name !== 'admin') {
+        
+        if (req.decodeToken.role_name !== 2 || req.decodeToken.subject.toString() !== req.params.user_id) {
             res.status(403).json({ message: 'Bu işlemi gerçekleştiremezsiniz'})
         } else {
             next();
@@ -85,19 +87,19 @@ const roleNameCheck = async (req, res, next) => {
     }
 }
 
-const userPutDelete = async (req, res, next) => {
-    try {
-        console.log(typeof req.decodeToken.subject.toString());
-        console.log(typeof req.params.user_id);        
-        if (req.decodeToken.subject.toString() === req.params.user_id) {
-            next();
-        } else {
-            res.status(403).json({ message: 'Bu işlemi gerçekleştiremezsiniz' })
-        }
-    } catch (error) {
-        next(error);
-    }
-}
+// const userPutDelete = async (req, res, next) => {
+//     try {
+//         console.log(typeof req.decodeToken.subject.toString());
+//         console.log(typeof req.params.user_id);        
+//         if (req.decodeToken.subject.toString() === req.params.user_id) {
+//             next();
+//         } else {
+//             res.status(403).json({ message: 'Bu işlemi gerçekleştiremezsiniz' })
+//         }
+//     } catch (error) {
+//         next(error);
+//     }
+// }
 
 const emailValidation = async (req, res, next) => {
     const emailCheck = req.body.email.toLowerCase()
@@ -134,5 +136,4 @@ module.exports = {
     roleNameCheck,
     emailValidation,
     emailCheck,
-    userPutDelete
 }

@@ -21,7 +21,7 @@ router.get('/:user_id', middleware.tokenCheck, middleware.roleNameCheck, async(r
 });
 
 
-router.put("/:user_id", middleware.tokenCheck, middleware.userPutDelete, async (req, res, next) => {
+router.put("/:user_id", middleware.tokenCheck, middleware.usernameCheck, async (req, res, next) => {
     try {
         const newUser = {
             name: req.body.name,
@@ -36,7 +36,7 @@ router.put("/:user_id", middleware.tokenCheck, middleware.userPutDelete, async (
     }
 })
 
-router.delete("/:user_id", middleware.tokenCheck, middleware.userPutDelete, async (req, res, next) => {
+router.delete("/:user_id", middleware.tokenCheck, middleware.usernameCheck, async (req, res, next) => {
     try {
         let willBeDeletedUser = await userModel.deleteUser(req.params.user_id);
         res.json(willBeDeletedUser);

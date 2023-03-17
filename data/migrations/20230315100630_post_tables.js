@@ -23,11 +23,15 @@ exports.up = function (knex) {
                 .onUpdate('CASCADE')
                 .onDelete('CASCADE')
         })
+        .createTable('comments', (table) => {
+            table.increments('comment_id')
+            table.string('comment_details', 512).notNullable();
+        })
         .createTable('posts', (table) => {
             table.increments('post_id')
             table.string('post_header', 128).notNullable()
             table.string('post_details', 128).notNullable()
-            table.string('post_date').notNullable()
+            table.string('post_date').defaultTo(knex.fn.now()).notNullable()
             table.integer('user_id')
                 .unsigned()
                 .notNullable()
@@ -35,6 +39,23 @@ exports.up = function (knex) {
                 .inTable('users')
                 .onUpdate('CASCADE')
                 .onDelete('CASCADE')
+        })
+        .createTable('posts_comments', (table) => {
+            table.integer('post_id')
+                .unsigned()
+                .notNullable()
+                .references('post_id')
+                .inTable('posts')
+                .onUpdate('CASCADE')
+                .onDelete('CASCADE')
+            table.integer('comment_id')
+                .unsigned()
+                .notNullable()
+                .references('comment_id')
+                .inTable('comments')
+                .onUpdate('CASCADE')
+                .onDelete('CASCADE')
+            table.primary(['post_id', 'comment_id'])    
         })
 };
 
@@ -44,7 +65,9 @@ exports.up = function (knex) {
  */
 exports.down = function (knex) {
     return knex.schema
-                    .dropTableIfExists('posts')
-                    .dropTableIfExists('users')
-                    .dropTableIfExists('roles')
+        .dropTableIfExists('posts_comments')
+        .dropTableIfExists('posts')
+        .dropTableIfExists('comments')
+        .dropTableIfExists('users')
+        .dropTableIfExists('roles')
 };
